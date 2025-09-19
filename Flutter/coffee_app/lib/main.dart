@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'order_summary.dart';
 
 void main() {
   runApp(const CoffeeShopApp());
@@ -153,7 +154,8 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                 },
               ),
             ),
-            Padding(
+            Padding
+            (
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +173,7 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 0.42, //adjust card size
+                    childAspectRatio: 0.42, // adjust card size if needed
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
@@ -243,7 +245,7 @@ class _CoffeeMenuItemState extends State<CoffeeMenuItem>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('You ordered ${widget.name}!'),
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 1),
       ),
     );
   }
