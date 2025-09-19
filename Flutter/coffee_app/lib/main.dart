@@ -110,9 +110,17 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
     },
   ];
 
-  void addOrder(Map<String, dynamic> item) {
+  void addOrder(Map<String, dynamic> item, int quantity) {
     setState(() {
-      orders.add(item);
+      final match = orders.indexWhere((order) => order['name'] == item['name']);
+     if (match != -1) {
+      orders[match]['quantity'] += quantity;
+      } else {
+      orders.add({
+        ...item,
+        'quantity': quantity,
+      } );
+      }
     });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('You ordered ${item['name']}!')),
@@ -260,7 +268,7 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                           price: item['price'] as double,
                           description: item['description'] as String,
                           imagePath: item['imagePath'] as String,
-                          onOrder: () => addOrder(item),
+                          onOrder: () => addOrder(item, 1),
                           onFavorite: () => toggleFavorite(item['name'] as String),
                           isFavorite: favorites.contains(item['name']),
                         ),
@@ -343,7 +351,7 @@ class CoffeeMenuItem extends StatelessWidget
           children: <Widget>[
             Expanded(
               child: AspectRatio(
-                aspectRatio: 1, // 1:1 square
+                aspectRatio: 2, // 1:1 square
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.asset(
@@ -432,6 +440,9 @@ class OrderSummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calculate total price of all orders
+  final double total = orders.fold(0.0, (sum, order) => sum + (order['price'] as double) * (order['quantity'] ?? 1), );
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Order Summary"),
@@ -485,8 +496,9 @@ class OrderSummaryScreen extends StatelessWidget {
                   ),
                   child: ListTile(
                     leading: Image.asset(order['imagePath']),
-                    title: Text(order['name']),
-                    subtitle: Text("₱${order['price'].toStringAsFixed(2)}"),
+                    title: Text('${order['name']} x${order['quantity'] ?? 1}'),
+                    // subtitle: Text("₱${order['price'].toStringAsFixed(2)}"),
+                    subtitle: Text("₱${(order['price'] * (order['quantity'] ?? 1)).toStringAsFixed(2)}"),
                     trailing: ElevatedButton(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -514,6 +526,33 @@ class OrderSummaryScreen extends StatelessWidget {
                 );
               },
             ),
+           bottomNavigationBar: orders.isEmpty
+          ? null
+          : Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+              color: Colors.brown[100],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Total:",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4A2B1B),
+                    ),
+                  ),
+                  Text(
+                    "₱${total.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6B4226),
+                    ),
+                  ),
+                ],
+              ),
+          ),
     );
   }
 }
