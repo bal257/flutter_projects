@@ -4,11 +4,13 @@ void main() {
   runApp(const CoffeeShopApp());
 }
 
-class CoffeeShopApp extends StatelessWidget {
+class CoffeeShopApp extends StatelessWidget 
+{
   const CoffeeShopApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return MaterialApp(
       title: 'Coffeeko',
       theme: ThemeData(
@@ -16,22 +18,25 @@ class CoffeeShopApp extends StatelessWidget {
         fontFamily: 'Roboto',
       ),
       home: const CoffeeMenuScreen(),
-      debugShowCheckedModeBanner: false, // Hide debug banner
+      debugShowCheckedModeBanner: false, 
     );
   }
 }
-class MyStatelessSearchBar extends StatelessWidget {
+class MyStatelessSearchBar extends StatelessWidget 
+{
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
 
-  const MyStatelessSearchBar({
+  const MyStatelessSearchBar
+  ({
     super.key,
     required this.onChanged,
     required this.onSubmitted,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -49,17 +54,20 @@ class MyStatelessSearchBar extends StatelessWidget {
   }
 }
 
-class CoffeeMenuScreen extends StatefulWidget {
+class CoffeeMenuScreen extends StatefulWidget 
+{
   const CoffeeMenuScreen({super.key});
 
   @override
   State<CoffeeMenuScreen> createState() => _CoffeeMenuScreenState();
 }
 
-class _CoffeeMenuScreenState extends State<CoffeeMenuScreen> {
+class _CoffeeMenuScreenState extends State<CoffeeMenuScreen> 
+{
   String searchQuery = '';
 
-  static const coffeeItems = [
+  static const coffeeItems = 
+  [
     {
       'name': 'Espresso',
       'price': 99.00,
@@ -75,7 +83,7 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen> {
     {
       'name': 'Cappuccino',
       'price': 89.00,
-      'description': 'Equal parts espresso, steamed milk, and foam.',
+      'description': 'Tasty cappuccino for your liking.',
       'imagePath': 'assets/img/cappuccino.png',
     },
     {
@@ -98,7 +106,8 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen> {
     },
   ];
 
-  List<Map<String, dynamic>> get filteredItems {
+  List<Map<String, dynamic>> get filteredItems 
+  {
     if (searchQuery.isEmpty) return coffeeItems;
     return coffeeItems
         .where((item) =>
@@ -107,7 +116,8 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -126,7 +136,8 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen> {
       backgroundColor: Colors.brown[50],
       body: SingleChildScrollView(
         child: Column(
-          children: <Widget>[
+          children: <Widget>
+          [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: MyStatelessSearchBar(
@@ -191,13 +202,15 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen> {
   }
 }
 
-class CoffeeMenuItem extends StatefulWidget {
+class CoffeeMenuItem extends StatefulWidget 
+{
   final String name;
   final double price;
   final String description;
   final String imagePath;
 
-  const CoffeeMenuItem({
+  const CoffeeMenuItem
+  ({
     super.key,
     required this.name,
     required this.price,
@@ -209,18 +222,22 @@ class CoffeeMenuItem extends StatefulWidget {
   State<CoffeeMenuItem> createState() => _CoffeeMenuItemState();
 }
 
-class _CoffeeMenuItemState extends State<CoffeeMenuItem> {
+class _CoffeeMenuItemState extends State<CoffeeMenuItem> 
+{
   bool isFavorite = false;
   int orderCount = 0;
 
-  void _toggleFavorite() {
+  void _toggleFavorite() 
+  {
     setState(() {
       isFavorite = !isFavorite;
     });
   }
 
-  void _orderCoffee(BuildContext context) {
-    setState(() {
+  void _orderCoffee(BuildContext context) 
+  {
+    setState(() 
+    {
       orderCount++;
     });
     ScaffoldMessenger.of(context).showSnackBar(
@@ -232,7 +249,8 @@ class _CoffeeMenuItemState extends State<CoffeeMenuItem> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Card(
       elevation: 4.0,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -362,11 +380,13 @@ class _CoffeeMenuItemState extends State<CoffeeMenuItem> {
   }
 }
 
-class FooterSection extends StatelessWidget {
+class FooterSection extends StatelessWidget 
+{
   const FooterSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) 
+  {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -414,3 +434,4 @@ class FooterSection extends StatelessWidget {
     );
   }
 }
+
