@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'order_summary.dart';
 
 void main() {
   runApp(const CoffeeShopApp());
@@ -39,14 +38,14 @@ class MyStatelessSearchBar extends StatelessWidget
   Widget build(BuildContext context) 
   {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      elevation: 5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: TextField(
         decoration: const InputDecoration(
           hintText: 'Search...',
           prefixIcon: Icon(Icons.search),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+          contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 16),
         ),
         onChanged: onChanged,
         onSubmitted: onSubmitted,
@@ -66,6 +65,10 @@ class CoffeeMenuScreen extends StatefulWidget
 class _CoffeeMenuScreenState extends State<CoffeeMenuScreen> 
 {
   String searchQuery = '';
+  final List<Map<String, dynamic>> orders = [];
+  final Set<String> favorites = {};
+
+  int _selectedIndex = 0;
 
   static const coffeeItems = 
   [
@@ -107,6 +110,59 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
     },
   ];
 
+  void addOrder(Map<String, dynamic> item) {
+    setState(() {
+      orders.add(item);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('You ordered ${item['name']}!')),
+    );
+  }
+
+  void toggleFavorite(String itemName) {
+    setState(() {
+      if (favorites.contains(itemName)) {
+        favorites.remove(itemName);
+      } else {
+        favorites.add(itemName);
+      }
+    });
+  }
+
+  // void goToSummary() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => OrderSummaryScreen(orders: orders),
+  //     ),
+  //   );
+  // }
+  void goToSummary() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => OrderSummaryScreen(
+        orders: orders,
+        onCancelOrder: (int index) {
+          setState(() {
+            orders.removeAt(index);
+          });
+        },
+      ),
+    ),
+  );
+}
+
+  void _onNavBarTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    if (index == 1) {
+      goToSummary();
+    }
+  }
+
   List<Map<String, dynamic>> get filteredItems 
   {
     if (searchQuery.isEmpty) return coffeeItems;
@@ -120,38 +176,58 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
   Widget build(BuildContext context) 
   {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Coffeeko',
-          style: TextStyle(
-            fontFamily: 'Pacifico',
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-            fontSize: 35,
-            height: 150,
+        appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80), 
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.brown,
+          ),
+          child: AppBar(
+            title: const Text(
+              'Coffeeko',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+                fontSize: 38,
+                height: 150,
+              ),
+            ),
+            centerTitle: true,
+            elevation: 0,
+            backgroundColor: Colors.transparent, 
+            flexibleSpace: null, 
           ),
         ),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 181, 135, 121),
       ),
       backgroundColor: Colors.brown[50],
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>
           [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: MyStatelessSearchBar(
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value;
-                  });
-                },
-                onSubmitted: (value) {
-                  setState(() {
-                    searchQuery = value;
-                  });
-                },
+            Container(
+              decoration: const BoxDecoration(
+                color: Colors.brown,
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 16), 
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: MyStatelessSearchBar(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                      onSubmitted: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding
@@ -164,6 +240,7 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                     'Hot and Cold Brew',
                     style: TextStyle(
                       fontSize: 26,
+                      fontFamily: 'Roboto',
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF4A2B1B),
                     ),
@@ -173,7 +250,7 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 0.42, // adjust card size if needed
+                    childAspectRatio: 0.50, 
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
@@ -183,6 +260,9 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                           price: item['price'] as double,
                           description: item['description'] as String,
                           imagePath: item['imagePath'] as String,
+                          onOrder: () => addOrder(item),
+                          onFavorite: () => toggleFavorite(item['name'] as String),
+                          isFavorite: favorites.contains(item['name']),
                         ),
                     ],
                   ),
@@ -200,16 +280,45 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
           ],
         ),
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onNavBarTapped,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.brown[800],
+        unselectedItemColor: Colors.brown[200],
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        iconSize: 30,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.coffee),
+            label: 'Menu',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Orders',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorites',
+          ),
+    
+        ],
+      ),
     );
   }
 }
 
-class CoffeeMenuItem extends StatefulWidget 
+class CoffeeMenuItem extends StatelessWidget 
 {
   final String name;
   final double price;
   final String description;
   final String imagePath;
+  final VoidCallback onOrder;
+  final VoidCallback onFavorite;
+  final bool isFavorite;
 
   const CoffeeMenuItem
   ({
@@ -218,163 +327,96 @@ class CoffeeMenuItem extends StatefulWidget
     required this.price,
     required this.description,
     required this.imagePath,
+    required this.onOrder,
+    required this.onFavorite,
+    required this.isFavorite,
   });
 
-  @override
-  State<CoffeeMenuItem> createState() => _CoffeeMenuItemState();
-}
-
-class _CoffeeMenuItemState extends State<CoffeeMenuItem> 
-{
-  bool isFavorite = false;
-  int orderCount = 0;
-
-  void _toggleFavorite() 
-  {
-    setState(() {
-      isFavorite = !isFavorite;
-    });
-  }
-
-  void _orderCoffee(BuildContext context) 
-  {
-    setState(() 
-    {
-      orderCount++;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('You ordered ${widget.name}!'),
-        duration: const Duration(seconds: 1),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return Card(
       elevation: 4.0,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.brown.withOpacity(0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+            Expanded(
+              child: AspectRatio(
+                aspectRatio: 1, // 1:1 square
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.asset(
-                    widget.imagePath,
-                    fit: BoxFit.contain,
+                    imagePath,
+                    fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: Colors.brown[100],
-                      child: const Icon(Icons.local_cafe, size: 40, color: Colors.brown),
+                      child: const Icon(Icons.local_cafe,
+                          size: 40, color: Colors.brown),
                     ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    widget.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF4A2B1B),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : Colors.brown,
-                  ),
-                  onPressed: _toggleFavorite,
-                  tooltip: isFavorite ? 'Unfavorite' : 'Favorite',
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
             Text(
-              '₱${widget.price.toStringAsFixed(2)}',
+              name,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF4A2B1B),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              '\₱${price.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 17,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF6B4226),
               ),
             ),
-            const SizedBox(height: 3),
-            Text(
-              widget.description,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[700],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            Flexible( 
+            child:Text(
+            description,
+            style: const TextStyle(
+              fontSize: 13,
+              fontStyle: FontStyle.normal,
+              color: Colors.black87,
             ),
-            const Spacer(),
-           Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-            ElevatedButton.icon
-            (
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4A2B1B),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-              ),
-              onPressed: () => _orderCoffee(context),
-              icon: const Icon(Icons.shopping_cart),
-              label: const Text('Order'),
-            ),
-    if (orderCount > 0)
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.brown[100],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          'Ordered: $orderCount',
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF4A2B1B),
-            fontWeight: FontWeight.bold,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
-      ),
-  ],
-),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? Colors.red : Colors.grey,
+                  ),
+                  onPressed: onFavorite,
+                ),
+                ElevatedButton(
+                  onPressed: onOrder,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text(
+                    "Order",
+                    style: TextStyle(
+                      color: Colors.white, 
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -382,13 +424,105 @@ class _CoffeeMenuItemState extends State<CoffeeMenuItem>
   }
 }
 
-class FooterSection extends StatelessWidget 
-{
+class OrderSummaryScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> orders;
+  final void Function(int) onCancelOrder;
+
+  const OrderSummaryScreen({super.key, required this.orders, required this.onCancelOrder});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Order Summary"),
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Pacifico',
+          fontWeight: FontWeight.bold,
+          letterSpacing: 2,
+          fontSize: 32,
+          fontStyle: FontStyle.italic,
+          color: Color.fromARGB(255, 218, 210, 181),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            color: Colors.brown
+          ),
+        ),
+      ),
+      body: orders.isEmpty
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "No items ordered yet.",
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w500,
+              ),
+               ),
+            const SizedBox(height: 12),
+            Image.asset(
+              'assets/img/coffee.png', 
+              width: 200,
+              height: 200,
+              fit: BoxFit.contain,
+            ),
+          ],
+        ),
+      )
+        : ListView.builder(
+              itemCount: orders.length,
+              itemBuilder: (context, index) {
+                final order = orders[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    leading: Image.asset(order['imagePath']),
+                    title: Text(order['name']),
+                    subtitle: Text("₱${order['price'].toStringAsFixed(2)}"),
+                    trailing: ElevatedButton(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${order['name']} canceled.')),
+                        );
+                        onCancelOrder(index);
+                        (context as Element);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
 
   @override
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -436,4 +570,3 @@ class FooterSection extends StatelessWidget
     );
   }
 }
-
