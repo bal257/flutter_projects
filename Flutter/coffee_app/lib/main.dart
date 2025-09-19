@@ -243,7 +243,7 @@ class _CoffeeMenuItemState extends State<CoffeeMenuItem>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('You ordered ${widget.name}!'),
-        duration: const Duration(seconds: 1),
+        duration: const Duration(seconds: 3),
       ),
     );
   }
@@ -299,7 +299,7 @@ class _CoffeeMenuItemState extends State<CoffeeMenuItem>
                   child: Text(
                     widget.name,
                     style: const TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFF4A2B1B),
                     ),
