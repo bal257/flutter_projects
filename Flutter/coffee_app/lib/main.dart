@@ -18,10 +18,11 @@ class CoffeeShopApp extends StatelessWidget
         fontFamily: 'Roboto',
       ),
       home: const CoffeeMenuScreen(),
-      debugShowCheckedModeBanner: false, 
+      debugShowCheckedModeBanner: false,
     );
   }
 }
+
 class MyStatelessSearchBar extends StatelessWidget 
 {
   final ValueChanged<String> onChanged;
@@ -35,8 +36,7 @@ class MyStatelessSearchBar extends StatelessWidget
   });
 
   @override
-  Widget build(BuildContext context) 
-  {
+  Widget build(BuildContext context) {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -113,13 +113,15 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
   void addOrder(Map<String, dynamic> item, int quantity) {
     setState(() {
       final match = orders.indexWhere((order) => order['name'] == item['name']);
-     if (match != -1) {
-      orders[match]['quantity'] += quantity;
+      if (match != -1) {
+        final currentQty =
+            ((orders[match]['quantity'] ?? 1) as num).toInt();
+        orders[match]['quantity'] = currentQty + quantity;
       } else {
-      orders.add({
-        ...item,
-        'quantity': quantity,
-      } );
+        orders.add({
+          ...item,
+          'quantity': quantity,
+        });
       }
     });
     ScaffoldMessenger.of(context).showSnackBar(
@@ -137,29 +139,18 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
     });
   }
 
-  // void goToSummary() {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => OrderSummaryScreen(orders: orders),
-  //     ),
-  //   );
-  // }
-  void goToSummary() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => OrderSummaryScreen(
-        orders: orders,
-        onCancelOrder: (int index) {
-          setState(() {
-            orders.removeAt(index);
-          });
-        },
+  // Navigate to summary and refresh parent after returning
+  void goToSummary() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OrderSummaryScreen(
+          orders: orders,
+        ),
       ),
-    ),
-  );
-}
+    );
+    setState(() {});
+  }
 
   void _onNavBarTapped(int index) {
     setState(() {
@@ -184,8 +175,8 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
   Widget build(BuildContext context) 
   {
     return Scaffold(
-        appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80), 
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.brown,
@@ -203,23 +194,22 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
             ),
             centerTitle: true,
             elevation: 0,
-            backgroundColor: Colors.transparent, 
-            flexibleSpace: null, 
+            backgroundColor: Colors.transparent,
+            flexibleSpace: null,
           ),
         ),
       ),
       backgroundColor: Colors.brown[50],
       body: SingleChildScrollView(
         child: Column(
-          children: <Widget>
-          [
+          children: <Widget>[
             Container(
               decoration: const BoxDecoration(
                 color: Colors.brown,
               ),
               child: Column(
                 children: [
-                  const SizedBox(height: 16), 
+                  const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     child: MyStatelessSearchBar(
@@ -238,8 +228,7 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                 ],
               ),
             ),
-            Padding
-            (
+            Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +247,7 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 0.50, 
+                    childAspectRatio: 0.50,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
@@ -311,15 +300,13 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
             icon: Icon(Icons.favorite),
             label: 'Favorites',
           ),
-    
         ],
       ),
     );
   }
 }
 
-class CoffeeMenuItem extends StatelessWidget 
-{
+class CoffeeMenuItem extends StatelessWidget {
   final String name;
   final double price;
   final String description;
@@ -328,8 +315,7 @@ class CoffeeMenuItem extends StatelessWidget
   final VoidCallback onFavorite;
   final bool isFavorite;
 
-  const CoffeeMenuItem
-  ({
+  const CoffeeMenuItem({
     super.key,
     required this.name,
     required this.price,
@@ -359,8 +345,7 @@ class CoffeeMenuItem extends StatelessWidget
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: Colors.brown[100],
-                      child: const Icon(Icons.local_cafe,
-                          size: 40, color: Colors.brown),
+                      child: const Icon(Icons.local_cafe, size: 40, color: Colors.brown),
                     ),
                   ),
                 ),
@@ -385,17 +370,17 @@ class CoffeeMenuItem extends StatelessWidget
                 color: Color(0xFF6B4226),
               ),
             ),
-            Flexible( 
-            child:Text(
-            description,
-            style: const TextStyle(
-              fontSize: 13,
-              fontStyle: FontStyle.normal,
-              color: Colors.black87,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
+            Flexible(
+              child: Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontStyle: FontStyle.normal,
+                  color: Colors.black87,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const SizedBox(height: 6),
             Row(
@@ -418,7 +403,7 @@ class CoffeeMenuItem extends StatelessWidget
                   child: const Text(
                     "Order",
                     style: TextStyle(
-                      color: Colors.white, 
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -432,17 +417,23 @@ class CoffeeMenuItem extends StatelessWidget
   }
 }
 
-class OrderSummaryScreen extends StatelessWidget {
+class OrderSummaryScreen extends StatefulWidget {
   final List<Map<String, dynamic>> orders;
-  final void Function(int) onCancelOrder;
 
-  const OrderSummaryScreen({super.key, required this.orders, required this.onCancelOrder});
+  const OrderSummaryScreen({super.key, required this.orders});
+
+  @override
+  State<OrderSummaryScreen> createState() => _OrderSummaryScreenState();
+}
+
+class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
+  double get total => widget.orders.fold(
+        0.0,
+        (sum, order) => sum + (order['price'] as double) * (((order['quantity'] ?? 1) as num).toDouble()),
+      );
 
   @override
   Widget build(BuildContext context) {
-    // Calculate total price of all orders
-  final double total = orders.fold(0.0, (sum, order) => sum + (order['price'] as double) * (order['quantity'] ?? 1), );
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Order Summary"),
@@ -458,36 +449,39 @@ class OrderSummaryScreen extends StatelessWidget {
         elevation: 0,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
-            color: Colors.brown
-          ),
+            color: Colors.brown),
         ),
       ),
-      body: orders.isEmpty
+      body: widget.orders.isEmpty
           ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "No items ordered yet.",
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w500,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "No items ordered yet.",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Image.asset(
+                    'assets/img/coffee.png',
+                    width: 200,
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
+                ],
               ),
-               ),
-            const SizedBox(height: 12),
-            Image.asset(
-              'assets/img/coffee.png', 
-              width: 200,
-              height: 200,
-              fit: BoxFit.contain,
-            ),
-          ],
-        ),
-      )
-        : ListView.builder(
-              itemCount: orders.length,
+            )
+          : ListView.builder(
+              itemCount: widget.orders.length,
               itemBuilder: (context, index) {
-                final order = orders[index];
+                final order = widget.orders[index];
+                final qty = ((order['quantity'] ?? 1) as num).toInt();
+                final name = order['name'] as String;
+                final price = (order['price'] as double);
+
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   elevation: 3,
@@ -496,16 +490,24 @@ class OrderSummaryScreen extends StatelessWidget {
                   ),
                   child: ListTile(
                     leading: Image.asset(order['imagePath']),
-                    title: Text('${order['name']} x${order['quantity'] ?? 1}'),
-                    // subtitle: Text("₱${order['price'].toStringAsFixed(2)}"),
-                    subtitle: Text("₱${(order['price'] * (order['quantity'] ?? 1)).toStringAsFixed(2)}"),
+                    title: Text('$name x$qty'),
+                    subtitle: Text("₱${(price * qty).toStringAsFixed(2)}"),
                     trailing: ElevatedButton(
                       onPressed: () {
+                        final capturedName = name;
+                        setState(() {
+                          if (index < 0 || index >= widget.orders.length) return;
+                          final currentQty =
+                              ((widget.orders[index]['quantity'] ?? 1) as num).toInt();
+                          if (currentQty > 1) {
+                            widget.orders[index]['quantity'] = currentQty - 1;
+                          } else {
+                            widget.orders.removeAt(index);
+                          }
+                        });
                         ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${order['name']} canceled.')),
+                          SnackBar(content: Text('$capturedName canceled.')),
                         );
-                        onCancelOrder(index);
-                        (context as Element);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -526,7 +528,7 @@ class OrderSummaryScreen extends StatelessWidget {
                 );
               },
             ),
-           bottomNavigationBar: orders.isEmpty
+      bottomNavigationBar: widget.orders.isEmpty
           ? null
           : Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
@@ -552,9 +554,12 @@ class OrderSummaryScreen extends StatelessWidget {
                   ),
                 ],
               ),
-          ),
+            ),
     );
   }
+}
+
+class Favorites extends StatefulWidget {
 }
 
 class FooterSection extends StatelessWidget {
