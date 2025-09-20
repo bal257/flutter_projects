@@ -66,7 +66,7 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
 {
   String searchQuery = '';
   final List<Map<String, dynamic>> orders = [];
-  final Set<String> favorites = {};
+  List<Map<String, dynamic>> favorites = [];
 
   int _selectedIndex = 0;
 
@@ -129,15 +129,28 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
     );
   }
 
-  void toggleFavorite(String itemName) {
+  void toggleFavorite(Map<String, dynamic> item) {
     setState(() {
-      if (favorites.contains(itemName)) {
-        favorites.remove(itemName);
-      } else {
-        favorites.add(itemName);
-      }
-    });
+      final existingFav = favorites.indexWhere((fav) => fav['name'] == item['name']);
+      if (existingFav >= 0) 
+        {
+          favorites.removeAt(existingFav);
+        } 
+      else 
+        {
+          favorites.add(item);
+        }
+      });
   }
+
+  void goToFavorites() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Favorites(favorites: favorites),
+    ),
+  );
+}
 
   // Navigate to summary and refresh parent after returning
   void goToSummary() async {
@@ -159,6 +172,9 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
 
     if (index == 1) {
       goToSummary();
+    }
+    else if (index == 2) {
+    goToFavorites();
     }
   }
 
@@ -253,13 +269,13 @@ class _CoffeeMenuScreenState extends State<CoffeeMenuScreen>
                     children: [
                       for (final item in filteredItems)
                         CoffeeMenuItem(
-                          name: item['name'] as String,
-                          price: item['price'] as double,
-                          description: item['description'] as String,
-                          imagePath: item['imagePath'] as String,
+                          name: item['name'],
+                          price: item['price'],
+                          description: item['description'],
+                          imagePath: item['imagePath'],
                           onOrder: () => addOrder(item, 1),
-                          onFavorite: () => toggleFavorite(item['name'] as String),
-                          isFavorite: favorites.contains(item['name']),
+                          onFavorite: () => toggleFavorite(item),  
+                          isFavorite: favorites.any((fav) => fav['name'] == item['name']),
                         ),
                     ],
                   ),
@@ -389,7 +405,7 @@ class CoffeeMenuItem extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : Colors.grey,
+                    color: Colors.red ,
                   ),
                   onPressed: onFavorite,
                 ),
@@ -560,7 +576,60 @@ class _OrderSummaryScreenState extends State<OrderSummaryScreen> {
 }
 
 class Favorites extends StatefulWidget {
+final List<Map<String, dynamic>> favorites;
+
+  const Favorites({super.key, required this.favorites});
+
+    @override
+ State<Favorites> createState() => _Favorites();
 }
+
+class _Favorites extends State<Favorites> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Favorites"),
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Pacifico',
+          fontWeight: FontWeight.bold,
+          letterSpacing: 2,
+          fontSize: 32,
+          fontStyle: FontStyle.italic,
+          color: Color.fromARGB(255, 218, 210, 181),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            color: Colors.brown),
+        ),
+      ),
+      body: widget.favorites.isEmpty
+          ? const Center(
+              child: Text(
+                "No favorites yet.",
+                style: TextStyle(fontSize: 20),
+              ),
+            )
+          : ListView.builder(
+              itemCount: widget.favorites.length,
+              itemBuilder: (context, index) {
+                final coffee = widget.favorites[index];
+                return Card(
+                  margin: const EdgeInsets.all(8),
+                  child: ListTile(
+                    leading: Image.asset(coffee['imagePath']),
+                    title: Text(coffee['name']),
+                    subtitle: Text("₱${coffee['price']}"),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
